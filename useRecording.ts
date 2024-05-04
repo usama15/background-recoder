@@ -612,8 +612,8 @@ export default function useRecording(
     }
   }
 
+  const existingRecording = {};
   async function startRecordingAfterDelay(delay: number) {
-    const existingRecording = {};
     existingRecording.current = new Audio.Recording()
     await existingRecording.current.prepareToRecordAsync(recordingOptions)
     await existingRecording.current.startAsync();
@@ -622,31 +622,20 @@ export default function useRecording(
       const status = await existingRecording.current.getStatusAsync();
       await existingRecording.current.stopAndUnloadAsync();
       const uri = existingRecording.current.getURI();
-      const newRecording = new Audio.Recording();
-      await newRecording.prepareToRecordAsync(recordingOptions);
       console.log(uri, 'delay', status)
-      
-      // logger.log(
-      //   emailAddress,
-      //   "recursivelyGetRecordingDataAndStopRecordingBuilder",
-      //   "Prepared, starting a new recording"
-      // );
-      await newRecording.startAsync();
-      existingRecording.current = newRecording;
       console.log('end')
+      startRecordingAfterDelay(60000);
+      setTimeout(() => {
+      }, 1000);
     }, delay);
   }
 
-  useEffect(() => {
-    // Start recording after 1 minute (60000 milliseconds) when the app is opened or resumed
-    // startRecordingAfterDelay(60000);
-
-    // Cleanup function
-    // return () => {
-    //   // Clear any existing timeouts
-
-    // };
-  }, []);
+  async function stopRecordingAfterDelay() {
+    BackgroundTimer.clearTimeout();
+    await existingRecording.current.stopAndUnloadAsync();
+    const uri = existingRecording.current.getURI();
+    console.log(uri, 'stop delay')
+  }
 
   useEffect(() => {
     askForPermission()
@@ -716,5 +705,6 @@ export default function useRecording(
     stopRecording,
     permissionStatus,
     askForPermission,
+    stopRecordingAfterDelay
   };
 }

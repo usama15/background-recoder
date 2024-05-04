@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { Button, StyleSheet, Text, View } from "react-native";
 import useRecording from "./useRecording";
 export default function App() {
-  const { startRecording, stopRecording, recordingTime, isRecording, startRecordingAfterDelay } =
+  const { startRecording, stopRecording,stopRecordingAfterDelay, recordingTime, isRecording, startRecordingAfterDelay } =
     useRecording();
   // BackgroundTimer.runBackgroundTimer(() => {
   //   console.log('run background timer')
@@ -11,7 +11,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Button title="recoderStart" onPress={() => startRecordingAfterDelay(60000)} />
-      <Button title="recoderStop" onPress={() => stopRecording()} />
+      <Button title="recoderStop" onPress={() => stopRecordingAfterDelay()} />
     </View>
   );
 }
