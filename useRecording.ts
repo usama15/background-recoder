@@ -2,7 +2,7 @@ import { AppState, Linking } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { Audio, InterruptionModeIOS } from "expo-av";
 import { getNetworkStateAsync } from "expo-network";
-import { registerTask, BackgroundTaskResult } from "expo-task-manager";
+import BackgroundTimer from "react-native-background-timer";
 
 import {
   setLayoutTimeout,
@@ -93,6 +93,8 @@ export default function useRecording(
       };
     }[]
   >(`recordingBatches`, []);
+
+
 
   async function askForPermission() {
     const requestPermissionResponse = await requestPermission();
@@ -596,6 +598,7 @@ export default function useRecording(
     else {
       // logger.log('Lost the reference to the "stopRecordingCallback" function');
       await audioRecording.current.stopAndUnloadAsync();
+      BackgroundTimer.clearTimeout();
       stopRecordingCallback.current =
         recursivelyGetRecordingDataAndStopRecordingBuilder({
           recording: {
@@ -608,6 +611,43 @@ export default function useRecording(
       if (stopRecordingCallback.current) await stopRecordingCallback.current();
     }
   }
+
+  async function startRecordingAfterDelay(delay: number) {
+    const existingRecording = {};
+    existingRecording.current = new Audio.Recording()
+    await existingRecording.current.prepareToRecordAsync(recordingOptions)
+    await existingRecording.current.startAsync();
+    console.log('start')
+    BackgroundTimer.setTimeout(async () => {
+      const status = await existingRecording.current.getStatusAsync();
+      await existingRecording.current.stopAndUnloadAsync();
+      const uri = existingRecording.current.getURI();
+      const newRecording = new Audio.Recording();
+      await newRecording.prepareToRecordAsync(recordingOptions);
+      console.log(uri, 'delay', status)
+      
+      // logger.log(
+      //   emailAddress,
+      //   "recursivelyGetRecordingDataAndStopRecordingBuilder",
+      //   "Prepared, starting a new recording"
+      // );
+      await newRecording.startAsync();
+      existingRecording.current = newRecording;
+      console.log('end')
+      // startRecording();
+    }, delay);
+  }
+
+  useEffect(() => {
+    // Start recording after 1 minute (60000 milliseconds) when the app is opened or resumed
+    // startRecordingAfterDelay(60000);
+
+    // Cleanup function
+    // return () => {
+    //   // Clear any existing timeouts
+
+    // };
+  }, []);
 
   useEffect(() => {
     askForPermission()
@@ -670,6 +710,7 @@ export default function useRecording(
   }, [isRecording, recordingTime, appState]);
 
   return {
+    startRecordingAfterDelay,
     recordingTime,
     isRecording,
     startRecording,
