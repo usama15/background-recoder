@@ -634,7 +634,6 @@ export default function useRecording(
       await newRecording.startAsync();
       existingRecording.current = newRecording;
       console.log('end')
-      // startRecording();
     }, delay);
   }
 
