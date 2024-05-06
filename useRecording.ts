@@ -625,8 +625,6 @@ export default function useRecording(
       console.log(uri, 'delay', status)
       console.log('end')
       startRecordingAfterDelay(60000);
-      setTimeout(() => {
-      }, 1000);
     }, delay);
   }
 
